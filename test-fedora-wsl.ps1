@@ -3,11 +3,23 @@
 $previousEncoding = [Console]::OutputEncoding
 [Console]::OutputEncoding = [System.Text.Encoding]::Unicode
 
+# TODO: move these to script parameters
+
+# Install Parameters
+$Global:commit = "c15c5e5"
+$Global:distroName = "Fedora_$($Global:commit)"
+$url = 'https://artifacts.dev.testing-farm.io/34ef2b4c-77cb-46b2-95ea-6acfebba8f71/work-buildmne4pw0d/tmt/plans/wsl/build/execute/data/guest/default-0/tmt/tests/build-image-1/data/Fedora-WSL-Base-Rawhide.20241219.2217.x86_64.tar.xz'
+
+# Globals
+$Global:wslUser = 'patrick'
+
+# Versions prior to 2.4.4 are "old" and require different setup steps and invocation than
+# 2.4.4+ which are "new"
+# See: https://fedoraproject.org/wiki/Changes/FedoraWSL
 enum WslVersions {
     old
     new
 }
-
 
 function Get-WslVersion {
     $wslVersionOutput = wsl.exe --version
@@ -30,12 +42,18 @@ function Run-Wsl {
 
     $outFile = (New-TemporaryFile).FullName
     $errFile = (New-TemporaryFile).FullName
+    
+    $argList = '-d', $Global:distroName
+    if ($Global:wslVersion == [WslVersions]::old) {
+        $argList += "-u $($Global:wslUser)"
+    }
+    $argList += '--', $cmdLine
 
     try {
-        # BUG - if a process in WSL is waiting on stdin, this will hang the test
+        # Note - if a process in WSL is waiting on stdin, this will hang the test. Don't do that.
         $proc = Start-Process -NoNewWindow `
                     -FilePath wsl.exe `
-                    -ArgumentList '-d', $Global:distroName, '--', $cmdLine `
+                    -ArgumentList $argList `
                     -Wait `
                     -PassThru `
                     -RedirectStandardOutput $outFile `
@@ -95,13 +113,8 @@ function Test-Wsl {
 
 
 # main entrypoint
-$wslVersion = Get-WslVersion
+$Global:wslVersion = Get-WslVersion
 Write-Host "WSL is $wslVersion"
-
-# TODO: move these to parameters
-$Global:commit = "c15c5e5"
-$Global:distroName = "Fedora_$($Global:commit)"
-$url = 'https://artifacts.dev.testing-farm.io/34ef2b4c-77cb-46b2-95ea-6acfebba8f71/work-buildmne4pw0d/tmt/plans/wsl/build/execute/data/guest/default-0/tmt/tests/build-image-1/data/Fedora-WSL-Base-Rawhide.20241219.2217.x86_64.tar.xz'
 
 Get-Build -url $url
 # TODO: install, set globals for distro name
