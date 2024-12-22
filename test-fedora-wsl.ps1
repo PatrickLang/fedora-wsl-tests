@@ -57,6 +57,17 @@ function Run-Wsl {
     return $out
 }
 
+function Get-Build {
+    [CmdletBinding()]
+    param (
+        [Parameter()]
+        [string]
+        $url
+    )
+    $filename = $url | Split-Path -Leaf
+    curl.exe -Lo $filename $url
+    return $filename
+}
 
 function Test-Wsl {
     Describe "Default user was created correctly" {
@@ -87,8 +98,14 @@ function Test-Wsl {
 $wslVersion = Get-WslVersion
 Write-Host "WSL is $wslVersion"
 
-# TODO: install temporary distro
-$distroName = "Fedora_684cadd" #TODO don't hardcode
+# TODO: move these to parameters
+$Global:commit = "c15c5e5"
+$Global:distroName = "Fedora_$($Global:commit)"
+$url = 'https://artifacts.dev.testing-farm.io/34ef2b4c-77cb-46b2-95ea-6acfebba8f71/work-buildmne4pw0d/tmt/plans/wsl/build/execute/data/guest/default-0/tmt/tests/build-image-1/data/Fedora-WSL-Base-Rawhide.20241219.2217.x86_64.tar.xz'
+
+Get-Build -url $url
+# TODO: install, set globals for distro name
+
 Test-Wsl
 # TODO: cleanup WSL
 
