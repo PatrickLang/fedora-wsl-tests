@@ -44,7 +44,7 @@ function Run-Wsl {
     $errFile = (New-TemporaryFile).FullName
     
     $argList = '-d', $Global:distroName
-    if ($Global:wslVersion == [WslVersions]::old) {
+    if ($Global:wslVersion -eq [WslVersions]::old) {
         $argList += "-u $($Global:wslUser)"
     }
     $argList += '--', $cmdLine
@@ -84,9 +84,33 @@ function Get-Build {
     )
     $filename = $url | Split-Path -Leaf
     curl.exe -Lo $filename $url
-    return $filename
+    return Get-Item $filename
 }
 
+function Install-Distro {
+[CmdletBinding()]
+param (
+    [Parameter()]
+    [System.IO.FileInfo]
+    $tarball
+)
+    
+    switch ($Global:wslVersion) {
+        new {
+            throw "Not implemented"
+        }
+        old {
+            $folder = New-Item -Force -ItemType Directory -Name $Global:distroName
+            Write-Host "Installing $($Global:distroName) in $($folder.FullName)"
+            wsl.exe --import $Global:distroName $folder.FullName $tarball.FullName
+        }
+        Default { throw "Install not supported on this version of Windows" }
+    }
+}
+
+function Remove-Distro {
+    wsl.exe --unregister $Global:distroName   
+}
 function Test-Wsl {
     Describe "Default user was created correctly" {
         It "uid is not 0" {
@@ -113,13 +137,16 @@ function Test-Wsl {
 
 
 # main entrypoint
-$Global:wslVersion = Get-WslVersion
-Write-Host "WSL is $wslVersion"
+try {
+    $Global:wslVersion = Get-WslVersion
+    Write-Host "WSL is $wslVersion"
 
-Get-Build -url $url
-# TODO: install, set globals for distro name
+    $tarball = Get-Build -url $url
+    Install-Distro -tarball $tarball
 
-Test-Wsl
-# TODO: cleanup WSL
+    Test-Wsl
+} finally {
+    Remove-Distro $tarball
+}
 
 [Console]::OutputEncoding = $previousEncoding
