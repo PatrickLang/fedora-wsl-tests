@@ -35,7 +35,7 @@ function Run-Wsl {
         # BUG - if a process in WSL is waiting on stdin, this will hang the test
         $proc = Start-Process -NoNewWindow `
                     -FilePath wsl.exe `
-                    -ArgumentList '--', $cmdLine `
+                    -ArgumentList '-d', $Global:distroName, '--', $cmdLine `
                     -Wait `
                     -PassThru `
                     -RedirectStandardOutput $outFile `
