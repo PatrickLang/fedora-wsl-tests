@@ -97,7 +97,11 @@ param (
     
     switch ($Global:wslVersion) {
         new {
-            throw "Not implemented"
+            Write-Host "Installing $($Global:distroName) from $($tarball.FullName)"
+            wsl.exe --install --from-file $tarball.FullName --name $Global:distroName
+            # The `n are important here as PowerShell will always throw a CRLF at the end of the pipeline.
+            # Manually adding the newline at the end allows a clean exit and the last CRLF is never parsed.
+            Write-Output "$Global:wslUser`nexit`n" | wsl.exe -d $Global:distroName
         }
         old {
             $folder = New-Item -Force -ItemType Directory -Name $Global:distroName
@@ -136,6 +140,8 @@ function Test-Wsl {
     }
 
     # BUGBUG: Currently dnf is hanging when run from wsl.exe, but is fine if run interactively
+    # dnf5.log shows the last line:
+    # 2024-12-22T23:09:07+0000 [340] INFO RPM callback start trigger-install scriptlet "man-db-0:2.13.0-1.fc42.x86_64"
     # Describe "sudo and dnf work" {
     #     It "Can run sudo -n dnf install ... without a password" {
     #         Run-Wsl -cmdLine "sudo -n dnf install --assumeyes pico"
