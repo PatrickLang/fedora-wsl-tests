@@ -136,11 +136,11 @@ function Test-Wsl {
     }
 
     # BUGBUG: Currently dnf is hanging when run from wsl.exe, but is fine if run interactively
-    # Describe "sudo and dnf work" {
-    #     It "Can run sudo -n dnf install ... without a password" {
-    #         Run-Wsl -cmdLine "sudo -n dnf install --assumeyes pico"
-    #     }
-    # }
+    Describe "sudo and dnf work" {
+        It "Can run sudo -n dnf install ... without a password" {
+            Run-Wsl -cmdLine "sudo -n dnf install --assumeyes pico"
+        }
+    }
 }
 
 
