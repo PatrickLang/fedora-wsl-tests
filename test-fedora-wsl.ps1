@@ -97,7 +97,8 @@ param (
     
     switch ($Global:wslVersion) {
         new {
-            wsl.exe --install --from-file $tarball.FullName --Name $Global:distroName
+            Write-Host "Installing $($Global:distroName) from $($tarball.FullName)"
+            wsl.exe --install --from-file $tarball.FullName --name $Global:distroName
             # The `n are important here as PowerShell will always throw a CRLF at the end of the pipeline.
             # Manually adding the newline at the end allows a clean exit and the last CRLF is never parsed.
             Write-Output "$Global:wslUser`nexit`n" | wsl.exe -d $Global:distroName
