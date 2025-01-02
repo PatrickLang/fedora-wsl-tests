@@ -83,7 +83,12 @@ function Get-Build {
         $url
     )
     $filename = $url | Split-Path -Leaf
-    curl.exe -Lo $filename $url
+    if (Test-Path $filename) {
+        Write-Host "Using existing file $($filename) and skipping download"
+    } else {
+        Write-Host "Downloading $($filename)"
+        curl.exe -Lo $filename $url
+    }
     return Get-Item $filename
 }
 
