@@ -169,6 +169,17 @@ function Test-Wsl {
             Run-Wsl -cmdLine "sudo -n dnf install --assumeyes pico"
         }
     }
+
+    Describe "Can run a wayland app" {
+        It "Can install foot" {
+            Run-Wsl -cmdLine "sudo -n dnf install --assumeyes foot"
+        }
+        It "Can run foot" {
+            # BUGBUG: Currently fails
+            #  err: wayland.c:1552: failed to connect to wayland; no compositor running?
+            Run-Wsl -cmdLine "foot sleep 5"
+        }
+    }
 }
 
 
