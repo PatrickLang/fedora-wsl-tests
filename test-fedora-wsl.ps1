@@ -12,6 +12,7 @@ $url = 'https://artifacts.dev.testing-farm.io/34ef2b4c-77cb-46b2-95ea-6acfebba8f
 
 # Globals
 $Global:wslUser = 'patrick'
+$Global:skipCleanup = $True
 
 # Versions prior to 2.4.4 are "old" and require different setup steps and invocation than
 # 2.4.4+ which are "new"
@@ -37,17 +38,29 @@ function Get-WslVersion {
 
 function Run-Wsl {
     param(
-        [string]$cmdLine
+        [string]$cmdLine,
+        [bool]$setUser = $True
     )
 
     $outFile = (New-TemporaryFile).FullName
     $errFile = (New-TemporaryFile).FullName
     
     $argList = '-d', $Global:distroName
-    if ($Global:wslVersion -eq [WslVersions]::old) {
+    if (($Global:wslVersion -eq [WslVersions]::old) -and ($setUser)) {
         $argList += "-u $($Global:wslUser)"
     }
     $argList += '--', $cmdLine
+
+    return Unwrap-Wsl -argList $argList
+}
+
+function Unwrap-Wsl {
+    param(
+        [array]$argList
+    )
+
+    $outFile = (New-TemporaryFile).FullName
+    $errFile = (New-TemporaryFile).FullName
 
     try {
         # Note - if a process in WSL is waiting on stdin, this will hang the test. Don't do that.
@@ -66,7 +79,7 @@ function Run-Wsl {
             $out = ""
         }
         if ($proc.ExitCode -ne 0) {
-            throw "wsl.exe -- $cmdLine returned exit code: $($proc.ExitCode)"
+            throw "wsl.exe $argList returned exit code: $($proc.ExitCode)"
         }
     } finally {
         Remove-Item $outFile
@@ -120,8 +133,12 @@ param (
 }
 
 function Remove-Distro {
-    wsl.exe --unregister $Global:distroName   
+    if ((wsl.exe -l | Select-String $Global:distroName).length -gt 0) {
+        Write-Host "Removing existing distro $Global:distroName"
+        wsl.exe --unregister $Global:distroName   
+    }
 }
+
 function Test-Wsl {
     Describe "Default user was created correctly" {
         It "uid is not 0" {
@@ -160,12 +177,17 @@ try {
     $Global:wslVersion = Get-WslVersion
     Write-Host "WSL is $wslVersion"
 
+    Write-Host "Cleaning up previous distro with same name if necessary..."
+    Remove-Distro $tarball
+
     $tarball = Get-Build -url $url
     Install-Distro -tarball $tarball
 
     Test-Wsl
 } finally {
-    Remove-Distro $tarball
+    if (! $Global:skipCleanup) {
+        Remove-Distro $tarball
+    }
 }
 
 [Console]::OutputEncoding = $previousEncoding
