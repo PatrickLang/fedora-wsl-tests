@@ -13,9 +13,9 @@ This is an informal tracking of issues with the tests, remaining work items, and
 
 This is a work in progress, so not all issues are tracked in bugzilla yet. This is mostly a scratchpad so I don't lose track of things as we're testing. Some should probably go into a known issues list on the wiki that's linked to the change proposal later.
 
-### Wayland is not working
+### Wayland and XWayland are not working
 
-The `DISPLAY` variable is set, but something seems to be preventing Wayland from actually working. This isn't an area I'm used to debugging and need to follow up more. Ubuntu 22.04 works on the same system, booted into the same kernel. 
+The `DISPLAY` and `WAYLAND_DISPLAY` variables are set, but something seems to be preventing Wayland from actually working. This isn't an area I'm used to debugging and need to follow up more. Ubuntu 22.04 works on the same system, booted into the same kernel. 
 
 ```
 $ waycheck
@@ -39,6 +39,12 @@ could not connect to wayland server
 Fatal server error:
 (EE) Couldn't add screen
 (EE)
+```
+
+```
+ $ foot
+warn: config.c:3775: Noto Sans Regular: font does not appear to be monospace; check your config, or disable this warning by setting [tweak].font-monospace-warn=no
+ err: wayland.c:1552: failed to connect to wayland; no compositor running?
 ```
 
 
