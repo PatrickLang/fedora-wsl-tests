@@ -40,3 +40,13 @@ Fatal server error:
 (EE) Couldn't add screen
 (EE)
 ```
+
+
+### systemd units that fail to start
+
+`journalctl` shows a variety of things that fail to start.
+
+```
+systemd-nsresourced[62]: bpf-lsm not supported, can't lock down user namespace.
+systemd[220]: Failed to attach 220 to compat systemd cgroup '/user.slice/user-1000.slice/user@1000.service/init.scope', ignoring: Permission denied
+```
