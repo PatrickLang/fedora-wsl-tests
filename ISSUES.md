@@ -4,16 +4,20 @@ This is an informal tracking of issues with the tests, remaining work items, and
 
 ## Test Items
 
-- [ ] Add more checks around systemd init
-- [ ] Add checks for wayland functionality
-
+- [ ] Add more checks around systemd init, ensure that additional systemd units will start with Fedora in WSL2 such as apache or stateful containers (systemd-nspawn or moby)
+- [x] Add checks for wayland functionality - added basic case with `foot` terminal emulator that is currently failing
+- [ ] PulseAudio functionality
+- [ ] GPU acceleration, depends on some DX12 work
 
 
 ## Issues with Fedora in WSL
 
 This is a work in progress, so not all issues are tracked in bugzilla yet. This is mostly a scratchpad so I don't lose track of things as we're testing. Some should probably go into a known issues list on the wiki that's linked to the change proposal later.
 
-### Wayland and XWayland are not working
+### Wayland and XWayland are not working - fix in progress
+
+> Workaround: `ln -s /mnt/wslg/runtime-dir/wayland-0 $XDG_RUNTIME_DIR/wayland-0` . Jeremy is still looking at how to wrap this up into the image.
+
 
 The `DISPLAY` and `WAYLAND_DISPLAY` variables are set, but something seems to be preventing Wayland from actually working. This isn't an area I'm used to debugging and need to follow up more. Ubuntu 22.04 works on the same system, booted into the same kernel. 
 
@@ -50,7 +54,7 @@ warn: config.c:3775: Noto Sans Regular: font does not appear to be monospace; ch
 
 ### systemd units that fail to start
 
-`journalctl` shows a variety of things that fail to start.
+`journalctl` shows a variety of things that fail to start. I'm not sure which could be ignored, vs which may break stuff.
 
 ```
 systemd-nsresourced[62]: bpf-lsm not supported, can't lock down user namespace.
