@@ -7,12 +7,13 @@ $previousEncoding = [Console]::OutputEncoding
 
 # Install Parameters
 # $Global:commit = "c15c5e5"
-$Global:commit = '3204666'
+$Global:commit = '164b4a8'
 $Global:distroName = "Fedora_$($Global:commit)"
 # $url = 'https://artifacts.dev.testing-farm.io/34ef2b4c-77cb-46b2-95ea-6acfebba8f71/work-buildmne4pw0d/tmt/plans/wsl/build/execute/data/guest/default-0/tmt/tests/build-image-1/data/Fedora-WSL-Base-Rawhide.20241219.2217.x86_64.tar.xz'
 #$url = 'https://artifacts.dev.testing-farm.io/9c8fa7d8-0bf0-46af-bbc3-5b192766f085/work-build3ccim3b0/tmt/plans/wsl/build/execute/data/guest/default-0/tmt/tests/build-image-1/data/Fedora-WSL-Base-Rawhide.20250117.1921.x86_64.tar.xz'
 # $url = 'https://artifacts.dev.testing-farm.io/3b64b746-e90b-4474-85b4-8d824b02ef16/work-buildpo1nz9w0/tmt/plans/wsl/build/execute/data/guest/default-0/tmt/tests/build-image-1/data/Fedora-WSL-Base-Rawhide.20250121.2341.x86_64.tar.xz'
-$url = 'https://artifacts.dev.testing-farm.io/b5fa4258-dd28-4c05-92f2-b4781c0e218e/work-build0ul6nisx/tmt/plans/wsl/build/execute/data/guest/default-0/tmt/tests/build-image-1/data/Fedora-WSL-Base-Rawhide.20250128.1640.x86_64.tar.xz'
+# $url = 'https://artifacts.dev.testing-farm.io/b5fa4258-dd28-4c05-92f2-b4781c0e218e/work-build0ul6nisx/tmt/plans/wsl/build/execute/data/guest/default-0/tmt/tests/build-image-1/data/Fedora-WSL-Base-Rawhide.20250128.1640.x86_64.tar.xz'
+$url = 'https://artifacts.dev.testing-farm.io/f71f7185-b043-45ba-89c3-4cdf137f3e42/work-buildsorifjve/tmt/plans/wsl/build/execute/data/guest/default-0/tmt/tests/build-image-1/data/Fedora-WSL-Base-Rawhide.20250201.1555.x86_64.tar.xz'
 # Globals
 $Global:wslUser = 'patrick'
 $Global:skipCleanup = $True
