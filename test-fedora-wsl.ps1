@@ -1,3 +1,9 @@
+param(
+    [String]$commit = '135d36e',
+    [String]$url = 'https://artifacts.dev.testing-farm.io/638cd346-3745-4172-8b9f-0cf88c41a936/work-buildq1dlsxml/tmt/plans/wsl/build/execute/data/guest/default-0/tmt/tests/build-image-1/data/Fedora-WSL-Base-42.20250204.2206.x86_64.tar.xz'
+)
+
+
 # wsl.exe always outputs unicode without BOM, which the console can display,
 # but PowerShell won't properly redirect into strings if the console is set to another encoding
 $previousEncoding = [Console]::OutputEncoding
@@ -6,18 +12,18 @@ $previousEncoding = [Console]::OutputEncoding
 # TODO: move these to script parameters
 
 # Install Parameters
-# $Global:commit = "c15c5e5"
-$Global:commit = '135d36e'
-$Global:distroName = "Fedora_$($Global:commit)"
+# $commit = "c15c5e5"
+#$commit = '135d36e'
+$distroName = "Fedora_$($commit)"
 # $url = 'https://artifacts.dev.testing-farm.io/34ef2b4c-77cb-46b2-95ea-6acfebba8f71/work-buildmne4pw0d/tmt/plans/wsl/build/execute/data/guest/default-0/tmt/tests/build-image-1/data/Fedora-WSL-Base-Rawhide.20241219.2217.x86_64.tar.xz'
 #$url = 'https://artifacts.dev.testing-farm.io/9c8fa7d8-0bf0-46af-bbc3-5b192766f085/work-build3ccim3b0/tmt/plans/wsl/build/execute/data/guest/default-0/tmt/tests/build-image-1/data/Fedora-WSL-Base-Rawhide.20250117.1921.x86_64.tar.xz'
 # $url = 'https://artifacts.dev.testing-farm.io/3b64b746-e90b-4474-85b4-8d824b02ef16/work-buildpo1nz9w0/tmt/plans/wsl/build/execute/data/guest/default-0/tmt/tests/build-image-1/data/Fedora-WSL-Base-Rawhide.20250121.2341.x86_64.tar.xz'
 # $url = 'https://artifacts.dev.testing-farm.io/b5fa4258-dd28-4c05-92f2-b4781c0e218e/work-build0ul6nisx/tmt/plans/wsl/build/execute/data/guest/default-0/tmt/tests/build-image-1/data/Fedora-WSL-Base-Rawhide.20250128.1640.x86_64.tar.xz'
 # $url = 'https://artifacts.dev.testing-farm.io/f71f7185-b043-45ba-89c3-4cdf137f3e42/work-buildsorifjve/tmt/plans/wsl/build/execute/data/guest/default-0/tmt/tests/build-image-1/data/Fedora-WSL-Base-Rawhide.20250201.1555.x86_64.tar.xz'
-$url = 'https://artifacts.dev.testing-farm.io/638cd346-3745-4172-8b9f-0cf88c41a936/work-buildq1dlsxml/tmt/plans/wsl/build/execute/data/guest/default-0/tmt/tests/build-image-1/data/Fedora-WSL-Base-42.20250204.2206.x86_64.tar.xz'
+#$url = 'https://artifacts.dev.testing-farm.io/638cd346-3745-4172-8b9f-0cf88c41a936/work-buildq1dlsxml/tmt/plans/wsl/build/execute/data/guest/default-0/tmt/tests/build-image-1/data/Fedora-WSL-Base-42.20250204.2206.x86_64.tar.xz'
 # Globals
-$Global:wslUser = 'patrick'
-$Global:skipCleanup = $True
+$wslUser = 'patrick'
+$skipCleanup = $True
 
 # Versions prior to 2.4.4 are "old" and require different setup steps and invocation than
 # 2.4.4+ which are "new"
@@ -50,9 +56,9 @@ function Run-Wsl {
     $outFile = (New-TemporaryFile).FullName
     $errFile = (New-TemporaryFile).FullName
     
-    $argList = '-d', $Global:distroName
-    if (($Global:wslVersion -eq [WslVersions]::old) -and ($setUser)) {
-        $argList += "-u $($Global:wslUser)"
+    $argList = '-d', $distroName
+    if (($wslVersion -eq [WslVersions]::old) -and ($setUser)) {
+        $argList += "-u $($wslUser)"
     }
     $argList += '--', $cmdLine
 
@@ -118,29 +124,29 @@ param (
     $tarball
 )
     
-    switch ($Global:wslVersion) {
+    switch ($wslVersion) {
         new {
-            Write-Host "Installing $($Global:distroName) from $($tarball.FullName)"
-            wsl.exe --install --from-file $tarball.FullName --name $Global:distroName
+            Write-Host "Installing $($distroName) from $($tarball.FullName)"
+            wsl.exe --install --from-file $tarball.FullName --name $distroName
             # The `n are important here as PowerShell will always throw a CRLF at the end of the pipeline.
             # Manually adding the newline at the end allows a clean exit and the last CRLF is never parsed.
-            Write-Output "$Global:wslUser`nexit`n" | wsl.exe -d $Global:distroName
+            Write-Output "$wslUser`nexit`n" | wsl.exe -d $distroName
         }
         old {
-            $folder = New-Item -Force -ItemType Directory -Name $Global:distroName
-            Write-Host "Installing $($Global:distroName) in $($folder.FullName)"
-            wsl.exe --import $Global:distroName $folder.FullName $tarball.FullName
+            $folder = New-Item -Force -ItemType Directory -Name $distroName
+            Write-Host "Installing $($distroName) in $($folder.FullName)"
+            wsl.exe --import $distroName $folder.FullName $tarball.FullName
             Write-Host "Running oobe.sh"
-            wsl.exe -d $Global:distroName -u root -- echo $Global:wslUser `| /usr/libexec/wsl/oobe.sh
+            wsl.exe -d $distroName -u root -- echo $wslUser `| /usr/libexec/wsl/oobe.sh
         }
         Default { throw "Install not supported on this version of Windows" }
     }
 }
 
 function Remove-Distro {
-    if ((wsl.exe -l | Select-String $Global:distroName).length -gt 0) {
-        Write-Host "Removing existing distro $Global:distroName"
-        wsl.exe --unregister $Global:distroName   
+    if ((wsl.exe -l | Select-String $distroName).length -gt 0) {
+        Write-Host "Removing existing distro $distroName"
+        wsl.exe --unregister $distroName   
     }
 }
 
@@ -152,7 +158,7 @@ function Test-Wsl {
         It "username is not root" {
             $actualUser = Run-Wsl -cmdLine "id -un"
             $actualUser | Should Not Be "root"
-            $actualUser | Should Be $Global:wslUser
+            $actualUser | Should Be $wslUser
         }
         $idOutput = (Run-Wsl -cmdLine "id")
         It "should be in group wheel" {
@@ -190,7 +196,7 @@ function Test-Wsl {
 
 # main entrypoint
 try {
-    $Global:wslVersion = Get-WslVersion
+    $wslVersion = Get-WslVersion
     Write-Host "WSL is $wslVersion"
 
     Write-Host "Cleaning up previous distro with same name if necessary..."
@@ -201,7 +207,7 @@ try {
 
     Test-Wsl
 } finally {
-    if (! $Global:skipCleanup) {
+    if (! $skipCleanup) {
         Remove-Distro $tarball
     }
 }
