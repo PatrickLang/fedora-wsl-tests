@@ -8,9 +8,19 @@ This is a simple set of end to end tests that aim to:
 
 ## Running the tests
 
+The script will run with a recent release based on hardcoded parameters:
+
 ```
 Set-ExecutionPolicy -scope Process -ExecutionPolicy bypass
 Invoke-Pester -Script .\test-fedora-wsl.ps1 -OutputFormat NUnitXml -OutputFile results.xml
+```
+
+These may be overridden by passing the parameters in `-Script` if desired:
+
+```
+Set-ExecutionPolicy -scope Process -ExecutionPolicy bypass
+$params = @{url = 'https://kojipkgs.fedoraproject.org/packages/Fedora-WSL-Base/42/20250331.n.0/images/Fedora-WSL-Base-42-20250331.n.0.aarch64.tar.xz'; commit='20250331'}
+Invoke-Pester -Script @{Path = '.\test-fedora-wsl.ps1'; Parameters = $params } -OutputFormat NUnitXml -OutputFile results.xml
 ```
 
 Here's an example run from a system that already had WSL installed:
